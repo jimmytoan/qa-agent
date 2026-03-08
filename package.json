@@ -1,0 +1,18 @@
+{
+  "name": "qa-agent",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "install:all": "pnpm install && cd backend && uv sync --all-extras",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "dev": "concurrently \"pnpm dev:backend\" \"pnpm dev:frontend\"",
+    "build:frontend": "pnpm --filter frontend build",
+    "build": "pnpm build:frontend",
+    "test:backend": "cd backend && uv run pytest"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

@@ -1,0 +1,10 @@
+<svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#9333EA" />
+    </linearGradient>
+  </defs>
+  <circle cx="45" cy="45" r="28" stroke="url(#qGrad)" stroke-width="14" fill="none" />
+  <line x1="62" y1="62" x2="82" y2="82" stroke="url(#qGrad)" stroke-width="14" stroke-linecap="round" />
+</svg>
