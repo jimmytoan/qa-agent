@@ -27,7 +27,7 @@ ENV ENV=prod
 ENV PYTHONUNBUFFERED=1
 
 # Install Chromium and its system dependencies via Playwright
-RUN playwright install chromium --with-deps
+RUN /app/backend/.venv/bin/playwright install chromium --with-deps
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')" || exit 1
