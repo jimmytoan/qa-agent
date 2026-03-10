@@ -102,6 +102,10 @@ else:
         # Defensive guard: /assets should be handled by StaticFiles mount above
         if full_path.startswith('assets/'):
             raise HTTPException(status_code=404, detail='Not found')
+        # Serve actual static files from frontend/dist root (e.g. logo.svg, favicon.ico)
+        static_file = frontend_dist / full_path
+        if static_file.exists() and static_file.is_file():
+            return FileResponse(static_file)    
         # Fall back to index.html for all SPA client-side routes
         index_file = frontend_dist / 'index.html'
         if index_file.exists():
