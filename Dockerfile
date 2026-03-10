@@ -19,15 +19,20 @@ RUN uv sync --locked --no-dev --no-default-groups
 # Stage 3: runtime
 FROM python:3.13-slim
 WORKDIR /app
+ARG ENV
+ENV ENV=${ENV}
 COPY --from=backend-builder /app/backend/.venv /app/backend/.venv
+COPY --from=backend-builder /app/backend/.env.${ENV} /app/backend/.env
 ENV PATH="/app/backend/.venv/bin:$PATH"
 COPY backend ./backend
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 ENV ENV=prod
 ENV PYTHONUNBUFFERED=1
 
-# Install Chromium and its system dependencies via Playwright
-RUN /app/backend/.venv/bin/playwright install chromium --with-deps
+# Install Chromium and its system dependencies directly (browser-use finds /usr/bin/chromium)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends chromium && \
+    rm -rf /var/lib/apt/lists/*
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')" || exit 1
