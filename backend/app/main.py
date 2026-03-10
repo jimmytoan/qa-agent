@@ -94,7 +94,7 @@ else:
         app.mount('/assets', StaticFiles(directory=str(assets_dir)), name='frontend-assets')
 
     # SPA catch-all: must be registered AFTER all API routers and static mounts
-    @app.get('/{full_path:path}', include_in_schema=False)
+    @app.get('/{full_path:path}', include_in_schema=False, response_model=None)
     async def serve_spa(full_path: str) -> FileResponse | JSONResponse:
         # Defensive guard: reject API paths that somehow fell through
         if full_path == 'api' or full_path.startswith('api/'):
