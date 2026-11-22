@@ -1,4 +1,5 @@
 import base64
+from io import BytesIO
 from pathlib import Path
 
 from sqlalchemy.orm import Session
@@ -55,6 +56,50 @@ def save_gif_artifact(run_id: str, task: str, result: object, db: Session) -> No
     if not gif_path.exists():
         return
 
+    db.add(
+        RunArtifactModel(
+            run_id=run_id,
+            kind=ArtifactKind.gif,
+            url=to_url_path(gif_path),
+            content_type='image/gif',
+            size_bytes=gif_path.stat().st_size,
+        )
+    )
+
+
+def save_screenshot_frames(run_id: str, screenshots: list[bytes], db: Session) -> None:
+    if not screenshots:
+        return
+
+    from PIL import Image
+
+    frames = []
+    for i, content in enumerate(screenshots, start=1):
+        screenshot_path = ARTIFACTS_DIR / f'{run_id}-step-{i}-screenshot.png'
+        screenshot_path.write_bytes(content)
+        with Image.open(BytesIO(content)) as image:
+            frames.append(image.convert('RGB'))
+        db.add(
+            RunArtifactModel(
+                run_id=run_id,
+                kind=ArtifactKind.screenshot,
+                url=to_url_path(screenshot_path),
+                content_type='image/png',
+                size_bytes=screenshot_path.stat().st_size,
+            )
+        )
+
+    gif_path = ARTIFACTS_DIR / f'{run_id}.gif'
+    frames[0].save(
+        gif_path,
+        format='GIF',
+        save_all=True,
+        append_images=frames[1:],
+        duration=600,
+        loop=0,
+    )
+    for frame in frames:
+        frame.close()
     db.add(
         RunArtifactModel(
             run_id=run_id,

@@ -16,6 +16,9 @@ dependencies = [
   "psycopg[binary]>=3.2.3,<4.0.0",
   "pydantic-settings>=2.0.0",
   "httpx>=0.27.0",
+  "python-socks[asyncio]>=3.2.2",
+  "microsoft-copilot-sdk>=2.0.1",
+  "pillow>=12.1.1",
 ]
 
 [build-system]

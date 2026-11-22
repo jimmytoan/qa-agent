@@ -21,8 +21,8 @@ const AI_MODELS = [
     { value: 'gpt-5-nano', label: 'GPT-5 nano (fastest, cheapest)' },
 
   ]},
-  { group: 'GitHub Models', models: [
-    { value: 'github/gpt-4o-mini', label: 'GPT-4o mini (GitHub Models)' },
+  { group: 'GitHub Copilot', models: [
+    { value: 'copilot/auto', label: 'Auto (GitHub Copilot)' },
   ]},
   { group: 'Azure OpenAI', models: [
     { value: 'gpt-5.4', label: 'GPT-5.4 (Azure deployment)' },

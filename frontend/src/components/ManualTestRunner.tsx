@@ -30,9 +30,9 @@ const AI_MODELS = [
     ],
   },
   {
-    group: 'GitHub Models',
+    group: 'GitHub Copilot',
     models: [
-      { value: 'github/gpt-4o-mini', label: 'GPT-4o mini (GitHub Models)' },
+      { value: 'copilot/auto', label: 'Auto (GitHub Copilot)' },
     ],
   },
   {

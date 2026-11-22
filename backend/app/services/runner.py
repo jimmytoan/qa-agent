@@ -26,15 +26,7 @@ def _build_llm(model_name: str) -> Any:
     model_lower = model_name.lower()
 
     if model_name.startswith('github/'):
-        from langchain_openai import ChatOpenAI
-        api_key = os.getenv('GITHUB_MODELS_TOKEN')
-        if not api_key:
-            raise RuntimeError('GITHUB_MODELS_TOKEN is required for GitHub Models')
-        return ChatOpenAI(
-            model=model_name.removeprefix('github/'),
-            api_key=api_key,
-            base_url='https://models.github.ai/inference',
-        )
+        raise RuntimeError('GitHub Models is retired; use the copilot/ model provider instead')
 
     if model_lower.startswith('gemini'):
         from langchain_google_genai import ChatGoogleGenerativeAI
@@ -96,8 +88,6 @@ async def run_browser_use_task(run_id: str) -> None:
         db.commit()
 
     try:
-        from browser_use import Agent, BrowserProfile
-
         with SessionLocal() as db:
             current = db.get(BrowserUseRunModel, run_id)
             if current is None:
@@ -105,38 +95,50 @@ async def run_browser_use_task(run_id: str) -> None:
             model_name = current.model
             task_text = current.task
 
-        llm = _build_llm(model_name)
-
-        headless = os.getenv('BROWSER_HEADLESS', 'false').lower() in ('1', 'true', 'yes')
-        browser_profile = BrowserProfile(headless=headless)
-
         queue = RUN_EVENTS.get(run_id)
 
-        async def on_step(state, output, step_num: int) -> None:
-            if queue is None:
-                return
-            actions = []
-            if output and output.action:
-                for a in (output.action if isinstance(output.action, list) else [output.action]):
-                    try:
-                        actions.append(a.model_dump(exclude_none=True))
-                    except Exception:
-                        actions.append(str(a))
-            await queue.put({
-                'type': 'step',
-                'step': step_num,
-                'evaluation': getattr(output, 'evaluation_previous_goal', None) if output else None,
-                'memory': getattr(output, 'memory', None) if output else None,
-                'next_goal': getattr(output, 'next_goal', None) if output else None,
-                'actions': actions,
-                'screenshot': state.screenshot if state else None,
-            })
-
         async with BROWSER_SEMAPHORE:
-            agent = Agent(task=task_text, llm=llm, browser_profile=browser_profile,
-                          register_new_step_callback=on_step)
-            result = await agent.run()
-        final_result = result.final_result() if hasattr(result, 'final_result') else str(result)
+            copilot_result = None
+            if model_name.startswith('copilot/'):
+                from .copilot_runner import run_copilot_sdk_task
+
+                copilot_result = await run_copilot_sdk_task(
+                    task=task_text,
+                    model_name=model_name.removeprefix('copilot/'),
+                    queue=queue,
+                )
+                final_result = copilot_result.final_result
+            else:
+                from browser_use import Agent, BrowserProfile
+
+                llm = _build_llm(model_name)
+                headless = os.getenv('BROWSER_HEADLESS', 'false').lower() in ('1', 'true', 'yes')
+                browser_profile = BrowserProfile(headless=headless)
+
+                async def on_step(state, output, step_num: int) -> None:
+                    if queue is None:
+                        return
+                    actions = []
+                    if output and output.action:
+                        for a in (output.action if isinstance(output.action, list) else [output.action]):
+                            try:
+                                actions.append(a.model_dump(exclude_none=True))
+                            except Exception:
+                                actions.append(str(a))
+                    await queue.put({
+                        'type': 'step',
+                        'step': step_num,
+                        'evaluation': getattr(output, 'evaluation_previous_goal', None) if output else None,
+                        'memory': getattr(output, 'memory', None) if output else None,
+                        'next_goal': getattr(output, 'next_goal', None) if output else None,
+                        'actions': actions,
+                        'screenshot': state.screenshot if state else None,
+                    })
+
+                agent = Agent(task=task_text, llm=llm, browser_profile=browser_profile,
+                              register_new_step_callback=on_step)
+                result = await agent.run()
+                final_result = result.final_result() if hasattr(result, 'final_result') else str(result)
 
         with SessionLocal() as db:
             run = db.get(BrowserUseRunModel, run_id)
@@ -150,8 +152,13 @@ async def run_browser_use_task(run_id: str) -> None:
             run.finished_at = utc_now()
             run.updated_at = utc_now()
 
-            save_screenshot_artifact(run_id=run_id, result=result, db=db)
-            save_gif_artifact(run_id=run_id, task=task_text, result=result, db=db)
+            if copilot_result is not None:
+                from .artifacts import save_screenshot_frames
+
+                save_screenshot_frames(run_id=run_id, screenshots=copilot_result.screenshots, db=db)
+            else:
+                save_screenshot_artifact(run_id=run_id, result=result, db=db)
+                save_gif_artifact(run_id=run_id, task=task_text, result=result, db=db)
             db.commit()
 
         if queue is not None:
