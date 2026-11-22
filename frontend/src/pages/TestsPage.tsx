@@ -18,6 +18,9 @@ const AI_MODELS = [
     { value: 'gpt-5-mini', label: 'GPT-5 mini (fast, cost-efficient)' },
     { value: 'gpt-5-nano', label: 'GPT-5 nano (fastest, cheapest)' },
   ]},
+  { group: 'GitHub Models', models: [
+    { value: 'github/gpt-4o-mini', label: 'GPT-4o mini (GitHub Models)' },
+  ]},
   { group: 'Azure OpenAI', models: [
     { value: 'gpt-5.4', label: 'GPT-5.4 (Azure deployment)' },
     { value: 'gpt-5-mini', label: 'GPT-5 mini (Azure deployment)' },

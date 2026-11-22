@@ -30,6 +30,12 @@ const AI_MODELS = [
     ],
   },
   {
+    group: 'GitHub Models',
+    models: [
+      { value: 'github/gpt-4o-mini', label: 'GPT-4o mini (GitHub Models)' },
+    ],
+  },
+  {
     group: 'Azure OpenAI',
     models: [
       { value: 'gpt-5.4', label: 'GPT-5.4 (Azure deployment)' },

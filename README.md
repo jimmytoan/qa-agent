@@ -17,7 +17,7 @@
 QA Agent is an **AI-powered E2E testing platform** for product, QA, and engineering teams.
 It lets you define browser tests in natural language, execute them with an LLM-driven browser agent, and inspect screenshots, GIFs, and run history when something fails.
 
-It supports **Azure OpenAI, OpenAI, Anthropic Claude, and Google Gemini**.
+It supports **GitHub Models, Azure OpenAI, OpenAI, Anthropic Claude, and Google Gemini**.
 
 ---
 
@@ -95,6 +95,7 @@ Import suites from Excel and export suite definitions.
 Use the provider that fits your workflow:
 
 - Azure OpenAI
+- GitHub Models
 - OpenAI
 - Anthropic Claude
 - Google Gemini
@@ -156,11 +157,13 @@ QA Agent chooses the provider automatically from the selected model name:
 
 - `gemini-*` → Google Gemini via `GOOGLE_API_KEY`
 - `claude-*` → Anthropic via `ANTHROPIC_API_KEY`
+- `github/<model-id>` → GitHub Models via `GITHUB_MODELS_TOKEN`
 - everything else → Azure OpenAI if `AZURE_OPENAI_API_KEY` is set, otherwise OpenAI via `OPENAI_API_KEY`
 
 Example models already supported in the UI:
 
 - **OpenAI**: `gpt-5.4`, `gpt-5-mini`, `gpt-4.1`, `gpt-4o`
+- **GitHub Models**: `github/gpt-4o-mini`
 - **Anthropic**: `claude-opus-4-6`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`
 - **Gemini**: `gemini-3.1-pro-preview`, `gemini-2.5-pro`, `gemini-2.5-flash`
 - **Azure OpenAI**: any deployment mapped through `AZURE_OPENAI_DEPLOYMENT_NAME` or matching the model name
@@ -180,7 +183,7 @@ See [backend/.env.example](backend/.env.example) for the full environment templa
 ### Agent Execution
 - browser-use
 - LangChain provider adapters
-- Azure OpenAI / OpenAI / Anthropic / Gemini
+- GitHub Models / Azure OpenAI / OpenAI / Anthropic / Gemini
 
 ### Frontend
 - React 19
@@ -234,6 +237,7 @@ DATABASE_URL=postgresql+psycopg://user:password@localhost:5432/qa_agent
 OPENAI_API_KEY=
 AZURE_OPENAI_API_KEY=
 AZURE_OPENAI_ENDPOINT=
+GITHUB_MODELS_TOKEN=
 ANTHROPIC_API_KEY=
 GOOGLE_API_KEY=
 ```

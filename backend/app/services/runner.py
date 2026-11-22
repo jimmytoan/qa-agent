@@ -18,13 +18,24 @@ from .artifacts import save_gif_artifact, save_screenshot_artifact
 def _build_llm(model_name: str) -> Any:
     """Return the appropriate LangChain chat model based on the model name.
 
-    Provider selection logic:
+    Provider selection for non-GitHub models:
     - ``gemini-*``  → Google Gemini via GOOGLE_API_KEY
     - ``claude-*``  → Anthropic via ANTHROPIC_API_KEY
     - everything else → Azure OpenAI (AZURE_OPENAI_API_KEY) or
                         standard OpenAI (OPENAI_API_KEY), whichever key is present.
     """
     model_lower = model_name.lower()
+
+    if model_name.startswith('github/'):
+        from langchain_openai import ChatOpenAI
+        api_key = os.getenv('GITHUB_MODELS_TOKEN')
+        if not api_key:
+            raise RuntimeError('GITHUB_MODELS_TOKEN is required for GitHub Models')
+        return ChatOpenAI(
+            model=model_name.removeprefix('github/'),
+            api_key=api_key,
+            base_url='https://models.github.ai/inference',
+        )
 
     if model_lower.startswith('gemini'):
         from langchain_google_genai import ChatGoogleGenerativeAI
