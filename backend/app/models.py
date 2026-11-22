@@ -1,7 +1,8 @@
 import enum
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import ENUM as PGEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -65,7 +66,11 @@ class SuiteRunModel(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     suite_id: Mapped[int] = mapped_column(ForeignKey('suites.id', ondelete='CASCADE'), nullable=False)
     product_id: Mapped[int | None] = mapped_column(ForeignKey('products.id', ondelete='SET NULL'), nullable=True)
-    status: Mapped[SuiteRunStatus] = mapped_column(Enum(SuiteRunStatus), nullable=False, default=SuiteRunStatus.queued)
+    status: Mapped[SuiteRunStatus] = mapped_column(
+        PGEnum(SuiteRunStatus, name='suite_run_status', create_type=False),
+        nullable=False,
+        default=SuiteRunStatus.queued,
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -104,7 +109,11 @@ class BrowserUseRunModel(Base):
     __tablename__ = 'browser_use_runs'
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    status: Mapped[RunStatus] = mapped_column(Enum(RunStatus), nullable=False, default=RunStatus.queued)
+    status: Mapped[RunStatus] = mapped_column(
+        PGEnum(RunStatus, name='run_status', create_type=False),
+        nullable=False,
+        default=RunStatus.queued,
+    )
     task: Mapped[str] = mapped_column(Text, nullable=False)
     model: Mapped[str] = mapped_column(String(255), nullable=False)
     product_id: Mapped[int | None] = mapped_column(ForeignKey('products.id', ondelete='SET NULL'), nullable=True)
@@ -129,7 +138,10 @@ class RunArtifactModel(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     run_id: Mapped[str] = mapped_column(ForeignKey('browser_use_runs.id', ondelete='CASCADE'), nullable=False)
-    kind: Mapped[ArtifactKind] = mapped_column(Enum(ArtifactKind), nullable=False)
+    kind: Mapped[ArtifactKind] = mapped_column(
+        PGEnum(ArtifactKind, name='artifact_kind', create_type=False),
+        nullable=False,
+    )
     url: Mapped[str] = mapped_column(Text, nullable=False)
     content_type: Mapped[str | None] = mapped_column(String(255), nullable=True)
     size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
