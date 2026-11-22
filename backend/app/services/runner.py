@@ -18,7 +18,6 @@ from .artifacts import save_gif_artifact, save_screenshot_artifact
 def _build_llm(model_name: str) -> Any:
     """Return the appropriate LangChain chat model based on the model name.
 
-    Provider selection for non-GitHub models:
     - ``gemini-*``  → Google Gemini via GOOGLE_API_KEY
     - ``claude-*``  → Anthropic via ANTHROPIC_API_KEY
     - everything else → Azure OpenAI (AZURE_OPENAI_API_KEY) or

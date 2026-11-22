@@ -242,6 +242,8 @@ ANTHROPIC_API_KEY=
 GOOGLE_API_KEY=
 ```
 
+Set `GITHUB_MODELS_TOKEN` to a GitHub token with `models:read` permission to use GitHub Models.
+
 ### 4. Run database migrations
 
 ```bash
